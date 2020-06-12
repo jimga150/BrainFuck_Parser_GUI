@@ -18,7 +18,8 @@ public:
             "++.>.<<-.>.+++.------.--------.>+.>++.";
     
     QString program = "";
-    bool stop = false;
+    
+    volatile bool stop = false;
     bool running = false;
     
     std::vector<char> memory;

@@ -236,8 +236,10 @@ void BrainFuck::runProgram(){
 //    double mem_access_percent = ((double)this->memory_access_count*100)/((double)this->instruction_count);
 //    fprintf(stdout, "%% of instructions that access memory: %0.1f%%\n", mem_access_percent);
     
+    int error = this->stop ? 1 : 0;
+    
     this->running = false;
     this->stop = false;
     
-    emit this->programExit(0);
+    emit this->programExit(error);
 }
