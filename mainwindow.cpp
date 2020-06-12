@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     
-    this->brainfuck.program = this->default_brainfuck; //TOOD: move line into BrainFuck.cpp
+    //TODO: add optional text wrapping to Output
     this->ui->Program_textbox->setText(this->brainfuck.program);
     
     this->ui->maxMem_spinBox->setMaximum(INT_MAX);

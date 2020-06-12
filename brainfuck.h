@@ -12,6 +12,10 @@ public:
     
     void reset_program();
         
+    const QString default_brainfuck = 
+            "++++++++[>++++[>++>+++>+++>+<<<<-]"
+            ">+>->+>>+[<]<-]>>.>>---.+++++++..+"
+            "++.>.<<-.>.+++.------.--------.>+.>++.";
     
     QString program = "";
     bool stop = false;

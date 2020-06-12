@@ -33,11 +33,7 @@ public:
     void update_maxmem();
     
     void update_output();
-        
-    const QString default_brainfuck = 
-            "++++++++[>++++[>++>+++>+++>+<<<<-]"
-            ">+>->+>>+[<]<-]>>.>>---.+++++++..+"
-            "++.>.<<-.>.+++.------.--------.>+.>++.";
+    
         
     BrainFuck brainfuck;
     

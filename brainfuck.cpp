@@ -3,7 +3,7 @@
 BrainFuck::BrainFuck(QObject *parent) : QObject(parent){
     
     this->memory.push_back(0);
-    
+    this->program = this->default_brainfuck;
 }
 
 void BrainFuck::reset_program(){
