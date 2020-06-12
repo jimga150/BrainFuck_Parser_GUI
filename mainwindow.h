@@ -1,58 +1,21 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 
-#include <QTextStream>
+#include <QMainWindow>
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QTimer>
+
+#include "brainfuck.h"
+#include "ui_mainwindow.h"
+
 
 #define BYTE_BASE (1)
 #define KB_BASE (1024)
 #define MB_BASE (KB_BASE*KB_BASE)
 #define GB_BASE (KB_BASE*KB_BASE*KB_BASE)
 
-struct brainfuck_struct{
-    QString program = "";
-    bool stop = false;
-    bool running = false;
-    
-    std::vector<char> memory;
-    uint64_t mem_index = 0;
-    
-    //TODO: probably an input pointer i can display
-    bool update_mem_ptr = false;
-    bool update_mem = false;
-    bool update_output = false;
-    
-    bool update_some_ui = false;
-    
-    QString input = "";
-    QString output = "";
-    
-    bool max_instructions_enforced = false;
-    uint max_instructions = INT_MAX;
-    
-    bool max_mem_enforced = false;
-    uint64_t max_memory = ULONG_LONG_MAX;
-    
-    uint64_t memory_access_count = 0;
-    uint64_t instruction_count = 0;
-    
-    brainfuck_struct(){
-        this->memory.push_back(0);
-    }
-    
-    void reset_program(){
-        this->memory.clear();
-        this->memory.push_back(0);
-        this->mem_index = 0;
-        this->output = "";
-        this->memory_access_count = 0;
-        this->instruction_count = 0;
-    }
-};
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -68,20 +31,24 @@ public:
     ~MainWindow();
         
     void update_maxmem();
+    
+    void update_output();
         
     const QString default_brainfuck = 
             "++++++++[>++++[>++>+++>+++>+<<<<-]"
             ">+>->+>>+[<]<-]>>.>>---.+++++++..+"
             "++.>.<<-.>.+++.------.--------.>+.>++.";
-    
-    brainfuck_struct bf_header;
+        
+    BrainFuck brainfuck;
     
     QFile* output_file = nullptr;
     
     
 public slots:
     
-    void runProgram();
+    void updateUI();
+    
+    void programFinished(int errorCode);
     
     
 private slots:
