@@ -15,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent)
     
     this->ui->maxMem_spinBox->setValue(this->bf_header.max_memory);
     this->ui->maxInst_spinBox->setValue(this->bf_header.max_instructions);
+    
+    QFont output_font("Monaco");
+    output_font.setStyleHint(QFont::Courier);
+    this->ui->Output->setFont(output_font);
+    //this->ui->Output->setCurrentFont(output_font);
 }
 
 MainWindow::~MainWindow()
@@ -24,6 +29,9 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::runProgram(){
+    
+    this->bf_header.running = true;
+    this->ui->start_pause_button->setText("Pause Program");
     
     const QString valid_commands = "><+-[].,";
     
@@ -130,13 +138,15 @@ void MainWindow::runProgram(){
     for(
         uint64_t i = 0; 
         
-        /*!sigint_received && */!halt && 
+        !this->bf_header.stop && !halt && 
         i < program_length && 
-        ++this->bf_header.instruction_count != this->bf_header.max_instructions; 
+        (!this->bf_header.max_mem_enforced || (this->bf_header.instruction_count != this->bf_header.max_instructions)); 
         
         i++){
         
-//        printf("%llu: %llu->%c (%d), mem ptr @ %llu, memeory: [", this->bf_header.instruction_count, i, program_chars[i], (int)program_chars[i], this->bf_header.mem_index);
+        ++this->bf_header.instruction_count;
+        
+//        printf("%llu: %llu-> %c (%d), mem ptr @ %llu, memory: [", this->bf_header.instruction_count, i, program_chars[i], (int)program_chars[i], this->bf_header.mem_index);
 //        for (char c : this->bf_header.memory){
 //            printf("%d, ", (int)c);
 //        }
@@ -144,75 +154,108 @@ void MainWindow::runProgram(){
         
         switch (program_chars[i]){
         case '>':
-            //printf("Incrementing pointer\n");
             
-            if (++this->bf_header.mem_index == this->bf_header.max_memory){
+            ++this->bf_header.mem_index;
+            
+            if (this->bf_header.max_mem_enforced && (this->bf_header.mem_index == this->bf_header.max_memory)){
                 halt = true;
                 break;
             }
+            
             if (this->bf_header.mem_index >= this->bf_header.memory.size()){
                 this->bf_header.memory.push_back(0);
             }
             
             break;
         case '<':
-            //printf("Decrementing pointer\n");
+
             if (this->bf_header.mem_index-- == 0){
                 //TODO: make useful error message channel
                 fprintf(stderr, "BrainFucked!!! (memory index underflow, exiting)\n");
                 halt = true;
-                break;
             }
+            
             break;
         case '+':
+            
             ++this->bf_header.memory_access_count;
-            //printf("Incrementing value at %ld\n", (ptr-memory));
             ++this->bf_header.memory[this->bf_header.mem_index];
+            
             break;
         case '-':
+            
             ++this->bf_header.memory_access_count;
-            //printf("Decrementing value at %ld\n", (ptr-memory));
             --this->bf_header.memory[this->bf_header.mem_index];
+            
             break;
         case '['://if pointer is 0, jump to command AFTER ending bracket
+            
             ++this->bf_header.memory_access_count;
+            
             if (!(this->bf_header.memory[this->bf_header.mem_index])){
                 i = LUT[i];
-            }	
+            }
+            
             break;
         case ']'://jump to complimentary opening bracket if pointer is non-zero
+            
             ++this->bf_header.memory_access_count;
+            
             if (this->bf_header.memory[this->bf_header.mem_index]){
                 i = LUT[i];
-            }	
+            }
+            
             break;
         case '.':
+            
             ++this->bf_header.memory_access_count;
+            
             this->bf_header.output.append(this->bf_header.memory[this->bf_header.mem_index]);
-            //printf("%c", this->bf_header.memory[this->bf_header.mem_index]);
-            //this->ui->Printout->setPlainText(output_str);
+            
+            this->bf_header.update_output = true;
+            this->bf_header.update_some_ui = true;
+            
             break;
         case ',':
+            
             ++this->bf_header.memory_access_count;
+            
             if (input.atEnd()){
                 fprintf(stderr, "End reached in input stream, exiting...\n");
                 halt = true;
                 break;
             }
+            
             input >> this->bf_header.memory[this->bf_header.mem_index];
+            
             break;
         default:
             //ignore any other input
             break;
-        }	
-        if (i % this->bf_header.instructions_per_ui_update == 0){
-            //update GUI here
-            this->updateUI();
+        }
+        
+        if (this->bf_header.update_some_ui){
+            
+            if (this->bf_header.update_output){
+                this->ui->Output->setText(this->bf_header.output);
+                
+                QFontMetrics fm(this->ui->Output->currentFont());
+                QSize text_size(fm.size(Qt::TextExpandTabs, this->bf_header.output));
+                
+                QSize viewport = this->ui->Output->geometry().size();
+                
+                if (viewport.width() < text_size.width() || viewport.height() < text_size.height()){
+                    this->ui->Output->zoomOut();
+                }
+                
+                this->bf_header.update_output = false;
+            }
+            
+            QApplication::processEvents();
+            this->bf_header.update_some_ui = false;
         }
     }
-    
-    this->updateUI();
-    
+        
     //printf("%s\n", this->bf_header.output.toUtf8().constData());    
     //printf("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     
@@ -227,18 +270,38 @@ void MainWindow::runProgram(){
         this->output_file->write(this->bf_header.output.toUtf8().constData());
         this->output_file->flush();
     }
+    
+    this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
+    this->bf_header.running = false;
+    this->bf_header.stop = false;
 }
 
-void MainWindow::updateUI(){
-    this->ui->Output->setText(this->bf_header.output);
+void MainWindow::on_progFile_button_clicked(){
+    QString filename = QFileDialog::getOpenFileName(
+                           this, 
+                           "Select program file", 
+                           QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).at(0)
+                           );
+    
+    if (filename.isNull()){
+        return;
+    }
+    
+    QFile infile(filename);
+    if (!infile.open(QIODevice::ReadOnly | QIODevice::Text)){
+        //TODO: notify user
+        return;
+    }
+    
+    QTextStream stream(&infile);
+    
+    this->bf_header.program = stream.readAll();
+    
+    this->ui->Program_textbox->setText(this->bf_header.program);
 }
 
-void MainWindow::on_maxMem_spinBox_valueChanged(int arg1){
-    this->bf_header.max_memory = arg1;
-}
-
-void MainWindow::on_maxInst_spinBox_valueChanged(int arg1){
-    this->bf_header.max_instructions = arg1;
+void MainWindow::on_Program_textbox_textChanged(){
+    this->bf_header.program = this->ui->Program_textbox->toPlainText();
 }
 
 void MainWindow::on_inFile_button_clicked(){
@@ -266,6 +329,10 @@ void MainWindow::on_inFile_button_clicked(){
     this->ui->Input->setText(this->bf_header.input);
 }
 
+void MainWindow::on_Input_textChanged(){
+    this->bf_header.input = this->ui->Input->toPlainText();
+}
+
 void MainWindow::on_outFile_button_clicked(){
     if (this->output_file){
         this->output_file->close();
@@ -290,15 +357,103 @@ void MainWindow::on_outFile_button_clicked(){
     }
 }
 
-void MainWindow::on_start_button_clicked(){
-    this->bf_header.reset_program();
-    QTimer::singleShot(100, this, SLOT(runProgram()));
+void MainWindow::on_maxMem_spinBox_valueChanged(int arg1){
+    Q_UNUSED(arg1)
+    this->update_maxmem();
 }
 
-void MainWindow::on_Input_textChanged(){
-    this->bf_header.input = this->ui->Input->toPlainText();
+void MainWindow::on_max_mem_units_comboBox_currentIndexChanged(const QString &arg1){
+    Q_UNUSED(arg1)
+    this->update_maxmem();
 }
 
-void MainWindow::on_Program_textbox_textChanged(){
-    this->bf_header.program = this->ui->Program_textbox->toPlainText();
+void MainWindow::update_maxmem(){
+    uint64_t multiplier = 1;
+    
+    QString units = this->ui->max_mem_units_comboBox->currentText();
+    switch(units.toUtf8().constData()[0]){
+    case 'B':
+        multiplier = BYTE_BASE;
+        break;
+    case 'K':
+        multiplier = KB_BASE;
+        break;
+    case 'M':
+        multiplier = MB_BASE;
+        break;
+    case 'G':
+        multiplier = GB_BASE;
+        break;
+    default:
+        fprintf(stderr, "Error: Unit not found: %s\n", units.toUtf8().constData());
+        break;
+    }
+    
+    uint coeff = this->ui->maxMem_spinBox->value();
+    
+    this->bf_header.max_memory = coeff*multiplier;
+    
+    printf("Setting max memory to %llu", this->bf_header.max_memory);
+}
+
+void MainWindow::on_maxInst_spinBox_valueChanged(int arg1){
+    this->bf_header.max_instructions = arg1;
+}
+
+void MainWindow::on_start_pause_button_clicked(){
+    if (this->bf_header.running){
+        this->bf_header.stop = true;
+        this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
+    } else {
+        this->bf_header.reset_program();
+        QTimer::singleShot(100, this, SLOT(runProgram()));
+    }
+}
+
+void MainWindow::on_zoom_in_output_button_clicked(){
+    this->ui->Output->zoomIn();
+}
+
+void MainWindow::on_zoom_out_output_button_clicked(){
+    this->ui->Output->zoomOut();
+}
+
+
+void MainWindow::on_limit_inst_checkBox_stateChanged(int arg1){
+    Qt::CheckState state = static_cast<Qt::CheckState>(arg1);
+    switch(state){
+    case Qt::Unchecked:
+        this->bf_header.max_instructions_enforced = false;
+        break;
+    case Qt::Checked:
+    case Qt::PartiallyChecked:
+        this->bf_header.max_instructions_enforced = true;
+        break;
+    default:
+        this->bf_header.max_instructions_enforced = false;
+        break;
+    }
+    
+    this->ui->max_inst_label->setEnabled(this->bf_header.max_instructions_enforced);
+    this->ui->maxInst_spinBox->setEnabled(this->bf_header.max_instructions_enforced);
+}
+
+void MainWindow::on_max_mem_checkBox_stateChanged(int arg1){
+    Qt::CheckState state = static_cast<Qt::CheckState>(arg1);
+    switch(state){
+    case Qt::Unchecked:
+        this->bf_header.max_mem_enforced = false;
+        break;
+    case Qt::Checked:
+    case Qt::PartiallyChecked:
+        this->bf_header.max_mem_enforced = true;
+        break;
+    default:
+        this->bf_header.max_mem_enforced = false;
+        break;
+    }
+    
+    this->ui->max_mem_label->setEnabled(this->bf_header.max_mem_enforced);
+    this->ui->maxMem_spinBox->setEnabled(this->bf_header.max_mem_enforced);
+    this->ui->max_mem_units_comboBox->setEnabled(this->bf_header.max_mem_enforced);
 }
