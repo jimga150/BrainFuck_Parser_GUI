@@ -36,10 +36,10 @@ public:
     QString output = "";
     
     bool max_instructions_enforced = false;
-    uint max_instructions = INT_MAX;
+    uint max_instructions = 0;
     
     bool max_mem_enforced = false;
-    uint64_t max_memory = ULONG_LONG_MAX;
+    uint64_t max_memory = 0;
     
     uint64_t memory_access_count = 0;
     uint64_t instruction_count = 0;
