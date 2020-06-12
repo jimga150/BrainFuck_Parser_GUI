@@ -208,48 +208,58 @@ void MainWindow::on_zoom_out_output_button_clicked(){
 
 
 void MainWindow::on_limit_inst_checkBox_stateChanged(int arg1){
+    
+    bool enforce_inst;
+    
     Qt::CheckState state = static_cast<Qt::CheckState>(arg1);
     switch(state){
     case Qt::Unchecked:
-        this->brainfuck.max_instructions_enforced = false;
+        enforce_inst = false;
         break;
     case Qt::Checked:
     case Qt::PartiallyChecked:
-        this->brainfuck.max_instructions_enforced = true;
+        enforce_inst = true;
         break;
     default:
-        this->brainfuck.max_instructions_enforced = false;
+        enforce_inst = false;
         break;
     }
     
-    this->ui->max_inst_label->setEnabled(this->brainfuck.max_instructions_enforced);
-    this->ui->maxInst_spinBox->setEnabled(this->brainfuck.max_instructions_enforced);
+    this->brainfuck.max_instructions_enforced = enforce_inst;
     
-    if (this->brainfuck.max_instructions_enforced){
+    this->ui->max_inst_label->setEnabled(enforce_inst);
+    this->ui->maxInst_spinBox->setEnabled(enforce_inst);
+    
+    if (enforce_inst){
         this->on_maxInst_spinBox_valueChanged(this->ui->maxInst_spinBox->value());
     }
 }
 
 void MainWindow::on_max_mem_checkBox_stateChanged(int arg1){
+    
+    bool enforce_mem;
+    
     Qt::CheckState state = static_cast<Qt::CheckState>(arg1);
     switch(state){
     case Qt::Unchecked:
-        this->brainfuck.max_mem_enforced = false;
+        enforce_mem = false;
         break;
     case Qt::Checked:
     case Qt::PartiallyChecked:
-        this->brainfuck.max_mem_enforced = true;
+        enforce_mem = true;
         break;
     default:
-        this->brainfuck.max_mem_enforced = false;
+        enforce_mem = false;
         break;
     }
     
-    this->ui->max_mem_label->setEnabled(this->brainfuck.max_mem_enforced);
-    this->ui->maxMem_spinBox->setEnabled(this->brainfuck.max_mem_enforced);
-    this->ui->max_mem_units_comboBox->setEnabled(this->brainfuck.max_mem_enforced);
+    this->brainfuck.max_mem_enforced = enforce_mem;
     
-    if (this->brainfuck.max_mem_enforced){
+    this->ui->max_mem_label->setEnabled(enforce_mem);
+    this->ui->maxMem_spinBox->setEnabled(enforce_mem);
+    this->ui->max_mem_units_comboBox->setEnabled(enforce_mem);
+    
+    if (enforce_mem){
         this->update_maxmem();
     }
 }
