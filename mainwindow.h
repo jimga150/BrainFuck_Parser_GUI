@@ -42,7 +42,7 @@ public:
     
 public slots:
     
-    void updateUI();
+    void updateUI(ui_updates_struct updates);
     
     void programFinished(int errorCode);
     

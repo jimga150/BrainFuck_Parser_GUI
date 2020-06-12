@@ -4,6 +4,19 @@
 #include <QObject>
 #include <QTextStream>
 
+struct ui_updates_struct{
+    //TODO: probably an input pointer i can display
+    bool update_mem_ptr = false;
+    bool update_mem = false;
+    bool update_output = false;
+    
+    void reset(){
+        this->update_mem_ptr = false;
+        this->update_mem = false;
+        this->update_output = false;
+    }
+};
+
 class BrainFuck : public QObject
 {
     Q_OBJECT
@@ -25,12 +38,8 @@ public:
     std::vector<char> memory;
     uint64_t mem_index = 0;
     
-    //TODO: probably an input pointer i can display
-    bool update_mem_ptr = false;
-    bool update_mem = false;
-    bool update_output = false;
-    
-    bool update_some_ui = false;
+    bool update_ui = false;
+    ui_updates_struct ui_updates;
     
     QString input = "";
     QString output = "";
@@ -46,7 +55,7 @@ public:
     
 signals:
     
-    void requestUIUpdate();
+    void requestUIUpdate(ui_updates_struct updates);
     
     void programExit(int error);
     

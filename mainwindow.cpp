@@ -30,13 +30,10 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::updateUI(){
-    //TODO: have brainfuck send struct of bools representing things to update
-    if (this->brainfuck.update_output){
+void MainWindow::updateUI(ui_updates_struct updates){
+    if (updates.update_output){
         this->update_output();
-        this->brainfuck.update_output = false;
     }
-    
     QApplication::processEvents();
 }
 

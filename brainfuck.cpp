@@ -198,8 +198,8 @@ void BrainFuck::runProgram(){
             
             this->output.append(this->memory[this->mem_index]);
             
-            this->update_output = true;
-            this->update_some_ui = true;
+            this->ui_updates.update_output = true;
+            this->update_ui = true;
             
             break;
         case ',':
@@ -220,9 +220,10 @@ void BrainFuck::runProgram(){
             break;
         }
         
-        if (this->update_some_ui){
-            emit this->requestUIUpdate();
-            this->update_some_ui = false;
+        if (this->update_ui){
+            emit this->requestUIUpdate(this->ui_updates);
+            this->ui_updates.reset();
+            this->update_ui = false;
         }
     }
         
