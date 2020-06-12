@@ -108,9 +108,7 @@ void BrainFuck::runProgram(){
     //printLongArray(stdout, LUT, char_count, "%ld ");
     
     //printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");	
-    
-    bool halt = false;
-        
+            
 //#if FALSE //#ifdef RAND_MEM
 //    printf("Randomizing memory...\n");
 //    //Loop through and randomize all memory
@@ -126,7 +124,7 @@ void BrainFuck::runProgram(){
     for(
         uint64_t i = 0; 
         
-        !this->stop && !halt && 
+        !this->stop &&
         i < program_length && 
         (!this->max_instructions_enforced || (this->instruction_count != this->max_instructions)); 
         
@@ -146,7 +144,7 @@ void BrainFuck::runProgram(){
             ++this->mem_index;
             
             if (this->max_mem_enforced && (this->mem_index >= this->max_memory)){
-                halt = true;
+                this->stop = true;
                 break;
             }
             
@@ -160,7 +158,7 @@ void BrainFuck::runProgram(){
             if (this->mem_index-- == 0){
                 //TODO: make useful error message channel
                 fprintf(stderr, "BrainFucked!!! (memory index underflow, exiting)\n");
-                halt = true;
+                this->stop = true;
             }
             
             break;
@@ -210,7 +208,7 @@ void BrainFuck::runProgram(){
             
             if (input.atEnd()){
                 fprintf(stderr, "End reached in input stream, exiting...\n");
-                halt = true;
+                this->stop = true;
                 break;
             }
             
