@@ -7,6 +7,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     
     //TODO: add optional text wrapping to Output
+    //TODO: report timing and program stats in UI
+    
+    //TODO: add display of pointer and memory
+    //TODO: add optional delay between instructions
+    
     this->ui->Program_textbox->setText(this->brainfuck.program);
     
     this->ui->maxMem_spinBox->setMaximum(INT_MAX);
