@@ -101,7 +101,7 @@ void MainWindow::update_memDisplay(){
         }
         
         if (this->memCellUIs.last_widget_width == 0){
-            this->memCellUIs.pointer_row[0].setText("^");
+            this->memCellUIs.pointer_row[0].setText(this->pointer_label);
         }
         
         this->memCellUIs.last_widget_width = widget_width;
@@ -115,8 +115,8 @@ void MainWindow::update_memDisplay(){
     }
     
     if (this->brainfuck.mem_index != this->memCellUIs.last_pointer_index){
-        this->memCellUIs.pointer_row[this->memCellUIs.last_pointer_index % num_cells].setText("");
-        this->memCellUIs.pointer_row[this->brainfuck.mem_index % num_cells].setText("^");
+        this->memCellUIs.pointer_row[this->memCellUIs.last_pointer_index % num_cells].clear();
+        this->memCellUIs.pointer_row[this->brainfuck.mem_index % num_cells].setText(this->pointer_label);
         this->memCellUIs.last_pointer_index = this->brainfuck.mem_index;
     }
 }

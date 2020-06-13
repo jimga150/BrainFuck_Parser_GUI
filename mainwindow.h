@@ -89,6 +89,9 @@ public:
     void update_memDisplay();
     
     
+    const QString pointer_label = "^";
+    
+    
     BrainFuck brainfuck;
     
     QFile* output_file = nullptr;
