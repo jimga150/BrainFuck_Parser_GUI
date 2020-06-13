@@ -6,7 +6,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     
-    //TODO: add display of pointer and memory
     //TODO: add optional delay between instructions
     //TODO: add ability to pause program and resume (separate from killing it)
     
@@ -70,28 +69,32 @@ void MainWindow::update_output(){
 
 void MainWindow::update_memDisplay(){
     
+    int min_cell_width = 100; //pixels //TODO: magic number
+    
     QGridLayout* layout = static_cast<QGridLayout*>(this->ui->memDisplay->layout());
     
-    QLayoutItem* item = nullptr;
-    while((item = layout->takeAt(0))){
-        //Dont delete widget, we own that and manage it elsewhere
-        delete item;
-    }
-    
     int widget_width = this->ui->memDisplay->width();
-    int min_cell_width = 100; //pixels
+    int num_cells = widget_width/min_cell_width;
+    uint64_t start_mem_index = this->brainfuck.mem_index - this->brainfuck.mem_index % num_cells;
     
-    int num_cells = widget_width/min_cell_width; //TODO: magic number
-    this->memCellUIs.change_num_cells(num_cells);
-    
-    for (int i = 0; i < num_cells; ++i){        
-        layout->addWidget(&(this->memCellUIs.labels[i]), 0, i, Qt::AlignHCenter);
-        layout->addWidget(&(this->memCellUIs.cells[i]), 1, i, Qt::AlignHCenter);
-        layout->addWidget(&(this->memCellUIs.pointer_row[i]), 2, i, Qt::AlignHCenter);
+    //TODO: add separate case for just shifting memory frame rather than redoing whole UI portion
+    if (widget_width != this->memCellUIs.last_widget_width || start_mem_index != this->memCellUIs.last_start_mem_index){
+        
+        //delete existing layout items (widgets inside will be preserved)
+        QLayoutItem* item = nullptr;
+        while((item = layout->takeAt(0))){
+            //Dont delete widget, we own that and manage it elsewhere
+            delete item;
+        }
+        
+        this->memCellUIs.change_num_cells(num_cells);
+        
+        for (int i = 0; i < num_cells; ++i){        
+            layout->addWidget(&(this->memCellUIs.labels[i]), 0, i, Qt::AlignHCenter);
+            layout->addWidget(&(this->memCellUIs.cells[i]), 1, i, Qt::AlignHCenter);
+            layout->addWidget(&(this->memCellUIs.pointer_row[i]), 2, i, Qt::AlignHCenter);
+        }
     }
-    
-    
-    int start_mem_index = this->brainfuck.mem_index - this->brainfuck.mem_index % num_cells;
     
     for (int i = 0; i < num_cells; ++i){
         

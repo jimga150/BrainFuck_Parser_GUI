@@ -26,6 +26,8 @@ struct memory_cell_displays_struct{
     int num_cells = 0;
     
     uint64_t last_pointer_index = 0;
+    int last_widget_width = 0;
+    uint64_t last_start_mem_index = 0;
     
     memory_cell_displays_struct(){}
     
