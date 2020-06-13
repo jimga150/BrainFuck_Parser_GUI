@@ -100,6 +100,10 @@ void MainWindow::update_memDisplay(){
             this->memCellUIs.labels[i].setNum(static_cast<int>(mem_index));
         }
         
+        if (this->memCellUIs.last_widget_width == 0){
+            this->memCellUIs.pointer_row[0].setText("^");
+        }
+        
         this->memCellUIs.last_widget_width = widget_width;
         this->memCellUIs.last_start_mem_index = start_mem_index;
     }
