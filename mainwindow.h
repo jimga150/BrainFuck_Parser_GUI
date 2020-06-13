@@ -77,7 +77,9 @@ public:
     
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-        
+    
+    void closeEvent(QCloseEvent *event) override;
+    
     void update_maxmem();
     
     void update_output();

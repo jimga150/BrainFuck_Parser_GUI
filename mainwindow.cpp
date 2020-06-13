@@ -35,6 +35,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event){
+    Q_UNUSED(event)
+    
+    //ask BF to stop
+    this->brainfuck.stop = true;
+    connect(&(this->brainfuck), &BrainFuck::programExit, this, &QMainWindow::close);
+}
 
 void MainWindow::updateUI(ui_updates_struct updates){
     if (updates.update_output){
