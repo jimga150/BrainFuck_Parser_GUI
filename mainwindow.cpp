@@ -94,13 +94,15 @@ void MainWindow::update_memDisplay(){
             layout->addWidget(&(this->memCellUIs.cells[i]), 1, i, Qt::AlignHCenter);
             layout->addWidget(&(this->memCellUIs.pointer_row[i]), 2, i, Qt::AlignHCenter);
         }
+        
+        for (int i = 0; i < num_cells; ++i){
+            uint mem_index = start_mem_index + i;
+            this->memCellUIs.labels[i].setNum(static_cast<int>(mem_index));
+        }
     }
     
     for (int i = 0; i < num_cells; ++i){
-        
         uint mem_index = start_mem_index + i;
-        this->memCellUIs.labels[i].setNum(static_cast<int>(mem_index));
-        
         int mem_value = mem_index < this->brainfuck.memory.size() ? this->brainfuck.memory[mem_index] : 0;
         this->memCellUIs.cells[i].setText(QString::number(mem_value));
     }
