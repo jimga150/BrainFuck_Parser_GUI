@@ -119,7 +119,7 @@ void MainWindow::programFinished(int errorCode){
                 "\nMemory used: " + QString::number(this->brainfuck.memory.size()) + " Bytes" +            
                 "\nInstructions used: " + QString::number(this->brainfuck.instruction_count) + 
                 "\nMemory accesses: " + QString::number(this->brainfuck.memory_access_count) + 
-                "\n" + QString::number(mem_access_percent) + "% of instructions accessed memory" + 
+                "\n" + QString::number(mem_access_percent, 'g', 3) + "% of instructions accessed memory" + 
                 (this->brainfuck.execution_time == 0 ? "" : "\nExecution time: " + QString::number(this->brainfuck.execution_time) + " ms")
                 );
     
