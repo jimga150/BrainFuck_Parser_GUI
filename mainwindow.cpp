@@ -5,11 +5,10 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    
-    //TODO: report timing and program stats in UI
-    
+        
     //TODO: add display of pointer and memory
     //TODO: add optional delay between instructions
+    //TODO: add ability to pause program and resume (separate from killing it)
     
     this->ui->Program_textbox->setText(this->brainfuck.program);
     
@@ -60,6 +59,18 @@ void MainWindow::update_output(){
 }
 
 void MainWindow::programFinished(int errorCode){
+    
+    double mem_access_percent = (this->brainfuck.memory_access_count*100.0)/(this->brainfuck.instruction_count);
+    
+    this->ui->Console->append(
+                "Program finished with exit code " + QString::number(errorCode) + 
+                "\n" + (errorCode ? "Error: " + this->brainfuck.error_message + "\n" : "") + 
+                "\nMemory used: " + QString::number(this->brainfuck.memory.size()) + " Bytes"               
+                "\nInstructions used: " + QString::number(this->brainfuck.instruction_count) + 
+                "\nMemory accesses: " + QString::number(this->brainfuck.memory_access_count) + 
+                "\n" + QString::number(mem_access_percent) + "% of instructions accessed memory" + 
+                (this->brainfuck.execution_time == 0 ? "" : "\nExecution time: " + QString::number(this->brainfuck.execution_time) + " ms")
+                );
     
     this->update_output();
     
@@ -199,8 +210,9 @@ void MainWindow::on_start_pause_button_clicked(){
         this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
     } else {
         this->brainfuck.reset_program();
+        this->ui->Console->clear();
         QTimer::singleShot(100, &(this->brainfuck), SLOT(runProgram()));
-        this->ui->start_pause_button->setText("Pause Program");
+        this->ui->start_pause_button->setText("Halt Program");
     }
 }
 

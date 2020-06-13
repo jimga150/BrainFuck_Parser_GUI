@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTextStream>
+#include <QElapsedTimer>
 
 struct ui_updates_struct{
     //TODO: probably an input pointer i can display
@@ -32,7 +33,7 @@ public:
     
     QString program = "";
     
-    volatile bool stop = false;
+    volatile bool stop = false; //To be assigned from other thread to halt program
     bool running = false;
     
     std::vector<char> memory;
@@ -43,6 +44,7 @@ public:
     
     QString input = "";
     QString output = "";
+    QString error_message = "";
     
     bool max_instructions_enforced = false;
     uint max_instructions = 0;
@@ -52,6 +54,8 @@ public:
     
     uint64_t memory_access_count = 0;
     uint64_t instruction_count = 0;
+    
+    uint64_t execution_time = 0; //ms
     
 signals:
     

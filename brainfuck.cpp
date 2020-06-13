@@ -12,6 +12,7 @@ void BrainFuck::reset_program(){
     this->mem_index = 0;
     
     this->output = "";
+    this->error_message = "";
     
     this->memory_access_count = 0;
     this->instruction_count = 0;
@@ -75,8 +76,7 @@ void BrainFuck::runProgram(){
 //    printf("]\n");
         
     if (looplevel){
-        //bracket mismatch
-        fprintf(stderr, "Bracket mismatch (last known level: %d, exiting)...\n", looplevel);
+        this->error_message = "Bracket mismatch. Last known level: " + QString::number(looplevel);
         emit this->programExit(1); //TODO: make real error enum
     }
     
@@ -106,9 +106,7 @@ void BrainFuck::runProgram(){
     
     //printf("printing LUT:\n");
     //printLongArray(stdout, LUT, char_count, "%ld ");
-    
-    //printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");	
-            
+                
 //#if FALSE //#ifdef RAND_MEM
 //    printf("Randomizing memory...\n");
 //    //Loop through and randomize all memory
@@ -121,6 +119,10 @@ void BrainFuck::runProgram(){
 //#endif
     
     //printf("Made it to program loop\n");
+    
+    QElapsedTimer timer;
+    timer.start();
+    
     for(
         uint64_t i = 0; 
         
@@ -157,7 +159,7 @@ void BrainFuck::runProgram(){
 
             if (this->mem_index-- == 0){
                 //TODO: make useful error message channel
-                fprintf(stderr, "BrainFucked!!! (memory index underflow, exiting)\n");
+                this->error_message = "BrainFucked!!! (memory index underflow)";
                 this->stop = true;
             }
             
@@ -206,8 +208,8 @@ void BrainFuck::runProgram(){
             
             ++this->memory_access_count;
             
-            if (input.atEnd()){
-                fprintf(stderr, "End reached in input stream, exiting...\n");
+            if (input.atEnd()){ //TODO: add option to wait for input instead of exiting with error
+                this->error_message = "Reached end of input stream";
                 this->stop = true;
                 break;
             }
@@ -226,18 +228,13 @@ void BrainFuck::runProgram(){
             this->update_ui = false;
         }
     }
-        
-    //printf("%s\n", this->output.toUtf8().constData());    
-    //printf("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     
-//    fprintf(stdout, "Memory used: %ld\n", this->memory.size());
-//    fprintf(stdout, "# instructions: %llu\n", this->instruction_count);
-//    fprintf(stdout, "# of memory accesses: %llu\n", this->memory_access_count);
-    
-//    double mem_access_percent = ((double)this->memory_access_count*100)/((double)this->instruction_count);
-//    fprintf(stdout, "%% of instructions that access memory: %0.1f%%\n", mem_access_percent);
+    this->execution_time = timer.elapsed();
     
     int error = this->stop ? 1 : 0;
+    if (this->error_message.length() == 0){
+        this->error_message = "Program Interrupted";
+    }
     
     this->running = false;
     this->stop = false;
