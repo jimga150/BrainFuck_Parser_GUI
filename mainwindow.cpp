@@ -147,7 +147,7 @@ void MainWindow::programFinished(int errorCode){
                 "\nMemory accesses: " + QString::number(this->brainfuck.memory_access_count) + 
                 "\n" + QString::number(mem_access_percent, 'g', 3) + "% of instructions accessed memory" + 
                 (exec_time == 0 ? "" : "\nExecution time: " + QString::number(exec_time) + " ms") + 
-                (exec_time == 0 ? "" : "\nInstructions per second: " + QString::number(ips, 'g', 3))
+                (exec_time == 0 ? "" : "\nInstructions per second: " + QString::number(ips))
                 );
     
     this->update_output();
