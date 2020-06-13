@@ -29,17 +29,6 @@ struct memory_cell_displays_struct{
     int last_widget_width = 0;
     uint64_t last_start_mem_index = 0;
     
-    memory_cell_displays_struct(){}
-    
-    memory_cell_displays_struct(int num_cells){
-        this->labels = new QLabel[num_cells];
-        this->cells = new QPushButton[num_cells];
-        this->pointer_row = new QLabel[num_cells];
-        this->pointer_row[0].setText("^");
-        
-        this->num_cells = num_cells;
-    }
-    
     ~memory_cell_displays_struct(){
         if (this->labels) delete [] this->labels;
         if (this->cells) delete [] this->cells;
