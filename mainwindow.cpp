@@ -6,7 +6,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     
-    //TODO: add optional text wrapping to Output
     //TODO: report timing and program stats in UI
     
     //TODO: add display of pointer and memory
@@ -23,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     QFont output_font("Monaco");
     output_font.setStyleHint(QFont::Courier);
     this->ui->Output->setFont(output_font);
+    
+    this->ui->Output->setLineWrapMode(QTextEdit::WidgetWidth);
+    this->on_textWrapping_checkBox_stateChanged(static_cast<int>(this->ui->textWrapping_checkBox->checkState()));
     
     connect(&this->brainfuck, &BrainFuck::requestUIUpdate, this, &MainWindow::updateUI);
     connect(&this->brainfuck, &BrainFuck::programExit, this, &MainWindow::programFinished);
@@ -50,7 +52,9 @@ void MainWindow::update_output(){
     
     QSize viewport = this->ui->Output->geometry().size();
     
-    if (viewport.width() < text_size.width() || viewport.height() < text_size.height()){
+    bool auto_zoom = this->ui->textWrapping_checkBox->checkState() == Qt::Unchecked;
+    
+    if (auto_zoom && (viewport.width() < text_size.width() || viewport.height() < text_size.height())){
         this->ui->Output->zoomOut();
     }
 }
@@ -263,5 +267,30 @@ void MainWindow::on_max_mem_checkBox_stateChanged(int arg1){
     
     if (enforce_mem){
         this->update_maxmem();
+    }
+}
+
+void MainWindow::on_textWrapping_checkBox_stateChanged(int arg1){
+    
+    bool enable_wrapping;
+    
+    Qt::CheckState state = static_cast<Qt::CheckState>(arg1);
+    switch(state){
+    case Qt::Unchecked:
+        enable_wrapping = false;
+        break;
+    case Qt::Checked:
+    case Qt::PartiallyChecked:
+        enable_wrapping = true;
+        break;
+    default:
+        enable_wrapping = false;
+        break;
+    }
+    
+    if (enable_wrapping){
+        this->ui->Output->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    } else {
+        this->ui->Output->setWordWrapMode(QTextOption::NoWrap);
     }
 }

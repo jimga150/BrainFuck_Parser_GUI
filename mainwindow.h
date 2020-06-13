@@ -75,6 +75,8 @@ private slots:
     
     void on_max_mem_checkBox_stateChanged(int arg1);
     
+    void on_textWrapping_checkBox_stateChanged(int arg1);
+    
 private:
     Ui::MainWindow *ui;
     
