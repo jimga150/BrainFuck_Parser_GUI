@@ -99,6 +99,9 @@ void MainWindow::update_memDisplay(){
             uint mem_index = start_mem_index + i;
             this->memCellUIs.labels[i].setNum(static_cast<int>(mem_index));
         }
+        
+        this->memCellUIs.last_widget_width = widget_width;
+        this->memCellUIs.last_start_mem_index = start_mem_index;
     }
     
     for (int i = 0; i < num_cells; ++i){
