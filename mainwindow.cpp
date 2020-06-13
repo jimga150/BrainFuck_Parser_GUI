@@ -118,6 +118,9 @@ void MainWindow::programFinished(int errorCode){
     
     double mem_access_percent = (this->brainfuck.memory_access_count*100.0)/(this->brainfuck.instruction_count);
     
+    unsigned long long exec_time = this->brainfuck.execution_time;
+    double ips = exec_time*1.0/this->brainfuck.instruction_count;
+    
     this->ui->Console->append(
                 "Program finished with exit code " + QString::number(errorCode) + 
                 "\n" + (errorCode ? "Error: " + this->brainfuck.error_message + "\n" : "") + 
@@ -125,7 +128,8 @@ void MainWindow::programFinished(int errorCode){
                 "\nInstructions used: " + QString::number(this->brainfuck.instruction_count) + 
                 "\nMemory accesses: " + QString::number(this->brainfuck.memory_access_count) + 
                 "\n" + QString::number(mem_access_percent, 'g', 3) + "% of instructions accessed memory" + 
-                (this->brainfuck.execution_time == 0 ? "" : "\nExecution time: " + QString::number(this->brainfuck.execution_time) + " ms")
+                (exec_time == 0 ? "" : "\nExecution time: " + QString::number(exec_time) + " ms") + 
+                (exec_time == 0 ? "" : "\nInstructions per second: " + QString::number(ips, 'g', 3))
                 );
     
     this->update_output();
