@@ -119,7 +119,7 @@ void MainWindow::programFinished(int errorCode){
     double mem_access_percent = (this->brainfuck.memory_access_count*100.0)/(this->brainfuck.instruction_count);
     
     unsigned long long exec_time = this->brainfuck.execution_time;
-    double ips = exec_time*1.0/this->brainfuck.instruction_count;
+    double ips = this->brainfuck.instruction_count*1.0/(exec_time/1000.0);
     
     this->ui->Console->append(
                 "Program finished with exit code " + QString::number(errorCode) + 
