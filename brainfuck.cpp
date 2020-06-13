@@ -132,7 +132,7 @@ void BrainFuck::runProgram(){
         
         i++){
         
-        QThread::msleep(500);
+        //QThread::msleep(500);
         ++this->instruction_count;
         
 //        printf("%llu: %llu-> %c (%d), mem ptr @ %llu, memory: [", this->instruction_count, i, program_chars[i], (int)program_chars[i], this->mem_index);
