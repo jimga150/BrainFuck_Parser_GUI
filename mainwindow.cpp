@@ -151,6 +151,7 @@ void MainWindow::programFinished(int errorCode){
                 );
     
     this->update_output();
+    this->update_memDisplay();
     
     if (this->output_file){
         this->output_file->write(this->brainfuck.output.toUtf8().constData());
