@@ -3,6 +3,7 @@
 
 
 #include <QMainWindow>
+#include <QScreen>
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QTimer>
@@ -86,6 +87,9 @@ public:
     QFile* output_file = nullptr;
     
     memory_cell_displays_struct memCellUIs;
+    
+    QElapsedTimer ui_update_timer;
+    int monitor_refresh_rate_ms = 0;
     
     
 public slots:

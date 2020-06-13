@@ -9,6 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
     //TODO: add optional delay between instructions
     //TODO: add ability to pause program and resume (separate from killing it)
     
+    this->monitor_refresh_rate_ms = static_cast<int>(1000.0/this->screen()->refreshRate());
+    
     this->ui->Program_textbox->setText(this->brainfuck.program);
     
     this->ui->maxMem_spinBox->setMaximum(INT_MAX);
@@ -43,6 +45,15 @@ void MainWindow::closeEvent(QCloseEvent *event){
 }
 
 void MainWindow::updateUI(ui_updates_struct updates){
+    
+    if (!this->ui_update_timer.isValid()){
+        this->ui_update_timer.start();
+    } else if (this->ui_update_timer.elapsed() < this->monitor_refresh_rate_ms){
+        return;
+    }
+    
+    this->ui_update_timer.restart();
+    
     if (updates.update_output){
         this->update_output();
     }
