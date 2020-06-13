@@ -132,6 +132,7 @@ void BrainFuck::runProgram(){
         
         i++){
         
+        QThread::sleep(1);
         ++this->instruction_count;
         
 //        printf("%llu: %llu-> %c (%d), mem ptr @ %llu, memory: [", this->instruction_count, i, program_chars[i], (int)program_chars[i], this->mem_index);
@@ -154,59 +155,67 @@ void BrainFuck::runProgram(){
                 this->memory.push_back(0);
             }
             
+            this->ui_updates.update_mem_ptr = true;
+            this->update_ui = true;
+            
             break;
         case '<':
 
             if (this->mem_index-- == 0){
-                //TODO: make useful error message channel
                 this->error_message = "BrainFucked!!! (memory index underflow)";
                 this->stop = true;
             }
             
+            this->ui_updates.update_mem_ptr = true;
+            this->update_ui = true;
+            
             break;
         case '+':
             
+            ++this->memory[this->mem_index];            
+            
             ++this->memory_access_count;
-            ++this->memory[this->mem_index];
+            this->ui_updates.update_mem = true;
+            this->update_ui = true;
             
             break;
         case '-':
             
+            --this->memory[this->mem_index];            
+            
             ++this->memory_access_count;
-            --this->memory[this->mem_index];
+            this->ui_updates.update_mem = true;
+            this->update_ui = true;
             
             break;
         case '['://if pointer is 0, jump to command AFTER ending bracket
-            
-            ++this->memory_access_count;
             
             if (!(this->memory[this->mem_index])){
                 i = LUT[i];
             }
             
+            ++this->memory_access_count;
+            
             break;
         case ']'://jump to complimentary opening bracket if pointer is non-zero
-            
-            ++this->memory_access_count;
             
             if (this->memory[this->mem_index]){
                 i = LUT[i];
             }
             
+            ++this->memory_access_count;
+            
             break;
         case '.':
             
-            ++this->memory_access_count;
+            this->output.append(this->memory[this->mem_index]);            
             
-            this->output.append(this->memory[this->mem_index]);
-            
+            ++this->memory_access_count;            
             this->ui_updates.update_output = true;
             this->update_ui = true;
             
             break;
         case ',':
-            
-            ++this->memory_access_count;
             
             if (input.atEnd()){ //TODO: add option to wait for input instead of exiting with error
                 this->error_message = "Reached end of input stream";
@@ -215,6 +224,8 @@ void BrainFuck::runProgram(){
             }
             
             input >> this->memory[this->mem_index];
+            
+            ++this->memory_access_count;
             
             break;
         default:

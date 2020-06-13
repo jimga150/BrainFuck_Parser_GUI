@@ -5,7 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-        
+    
     //TODO: add display of pointer and memory
     //TODO: add optional delay between instructions
     //TODO: add ability to pause program and resume (separate from killing it)
@@ -40,6 +40,9 @@ void MainWindow::updateUI(ui_updates_struct updates){
     if (updates.update_output){
         this->update_output();
     }
+    if (updates.update_mem || updates.update_mem_ptr){ //TODO: separate these?
+        this->update_memDisplay();
+    }
     QApplication::processEvents();
 }
 
@@ -58,6 +61,47 @@ void MainWindow::update_output(){
     }
 }
 
+void MainWindow::update_memDisplay(){
+    
+    QGridLayout* layout = static_cast<QGridLayout*>(this->ui->memDisplay->layout());
+    
+    QLayoutItem* item = nullptr;
+    while((item = layout->takeAt(0))){
+        //Dont delete widget, we own that and manage it elsewhere
+        delete item;
+    }
+    
+    int widget_width = this->ui->memDisplay->width();
+    int min_cell_width = 100; //pixels
+    
+    int num_cells = widget_width/min_cell_width; //TODO: magic number
+    this->memCellUIs.change_num_cells(num_cells);
+    
+    for (int i = 0; i < num_cells; ++i){        
+        layout->addWidget(&(this->memCellUIs.labels[i]), 0, i, Qt::AlignHCenter);
+        layout->addWidget(&(this->memCellUIs.cells[i]), 1, i, Qt::AlignHCenter);
+        layout->addWidget(&(this->memCellUIs.pointer_row[i]), 2, i, Qt::AlignHCenter);
+    }
+    
+    
+    int start_mem_index = this->brainfuck.mem_index - this->brainfuck.mem_index % num_cells;
+    
+    for (int i = 0; i < num_cells; ++i){
+        
+        uint mem_index = start_mem_index + i;
+        this->memCellUIs.labels[i].setNum(static_cast<int>(mem_index));
+        
+        int mem_value = mem_index < this->brainfuck.memory.size() ? this->brainfuck.memory[mem_index] : 0;
+        this->memCellUIs.cells[i].setText(QString::number(mem_value));
+    }
+    
+    if (this->brainfuck.mem_index != this->memCellUIs.last_pointer_index){
+        this->memCellUIs.pointer_row[this->memCellUIs.last_pointer_index % num_cells].setText("");
+        this->memCellUIs.pointer_row[this->brainfuck.mem_index % num_cells].setText("^");
+        this->memCellUIs.last_pointer_index = this->brainfuck.mem_index;
+    }
+}
+
 void MainWindow::programFinished(int errorCode){
     
     double mem_access_percent = (this->brainfuck.memory_access_count*100.0)/(this->brainfuck.instruction_count);
@@ -65,7 +109,7 @@ void MainWindow::programFinished(int errorCode){
     this->ui->Console->append(
                 "Program finished with exit code " + QString::number(errorCode) + 
                 "\n" + (errorCode ? "Error: " + this->brainfuck.error_message + "\n" : "") + 
-                "\nMemory used: " + QString::number(this->brainfuck.memory.size()) + " Bytes"               
+                "\nMemory used: " + QString::number(this->brainfuck.memory.size()) + " Bytes" +            
                 "\nInstructions used: " + QString::number(this->brainfuck.instruction_count) + 
                 "\nMemory accesses: " + QString::number(this->brainfuck.memory_access_count) + 
                 "\n" + QString::number(mem_access_percent) + "% of instructions accessed memory" + 

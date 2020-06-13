@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTextStream>
 #include <QElapsedTimer>
+#include <QThread>
 
 struct ui_updates_struct{
     //TODO: probably an input pointer i can display
