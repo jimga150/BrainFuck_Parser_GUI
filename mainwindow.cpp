@@ -163,7 +163,7 @@ void MainWindow::update_memDisplay(){
     for (int i = 0; i < num_cells; ++i){
         uint mem_index = start_mem_index + i;
         int mem_value = mem_index < this->brainfuck.memory.size() ? this->brainfuck.memory[mem_index] : 0;
-        this->memCellUIs.cells[i].setText(QString::number(mem_value));
+        this->memCellUIs.cells[i].setText(QString::number(mem_value, 16).toUpper().right(2));
     }
     
     if (this->brainfuck.mem_index != this->memCellUIs.last_pointer_index){
