@@ -40,8 +40,10 @@ void MainWindow::closeEvent(QCloseEvent *event){
     Q_UNUSED(event)
     
     //ask BF to stop
-    this->brainfuck.stop = true;
-    connect(&(this->brainfuck), &BrainFuck::programExit, this, &QMainWindow::close);
+    if (this->brainfuck.running){
+        this->brainfuck.stop = true;
+        connect(&(this->brainfuck), &BrainFuck::programExit, this, &QMainWindow::close);
+    }
 }
 
 void MainWindow::showEvent(QShowEvent* event){
