@@ -425,3 +425,14 @@ void MainWindow::on_textWrapping_checkBox_stateChanged(int arg1){
         this->ui->Output->setWordWrapMode(QTextOption::NoWrap);
     }
 }
+
+void MainWindow::on_timeDelay_horizontalSlider_sliderMoved(int position){
+    this->ui->timeDelay_spinBox->setValue(position);
+    this->brainfuck.command_delay = position;
+}
+
+void MainWindow::on_timeDelay_spinBox_editingFinished(){
+    int new_value = this->ui->timeDelay_spinBox->value();
+    this->ui->timeDelay_horizontalSlider->setValue(new_value);
+    this->brainfuck.command_delay = new_value;
+}

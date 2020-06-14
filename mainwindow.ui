@@ -15,6 +15,21 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>4</number>
+    </property>
+    <property name="topMargin">
+     <number>4</number>
+    </property>
+    <property name="rightMargin">
+     <number>4</number>
+    </property>
+    <property name="bottomMargin">
+     <number>4</number>
+    </property>
+    <property name="spacing">
+     <number>4</number>
+    </property>
     <item row="8" column="0">
      <widget class="QWidget" name="widget_2" native="true">
       <layout class="QGridLayout" name="gridLayout_3">
@@ -67,13 +82,6 @@
       </property>
       <property name="acceptRichText">
        <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>BrainFuck Program</string>
       </property>
      </widget>
     </item>
@@ -135,36 +143,10 @@
        <property name="spacing">
         <number>0</number>
        </property>
-       <item row="23" column="1" colspan="2">
-        <widget class="QPushButton" name="start_pause_button">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="5" column="1" colspan="2">
+        <widget class="QPushButton" name="outFile_button">
          <property name="text">
-          <string>Fuck it!!! (execute)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="1" colspan="2">
-        <widget class="QLabel" name="max_inst_label">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Max # of Instructions</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="14" column="1">
-        <widget class="QSpinBox" name="maxMem_spinBox">
-         <property name="enabled">
-          <bool>false</bool>
+          <string>Select Output file</string>
          </property>
         </widget>
        </item>
@@ -175,15 +157,15 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="1" colspan="2">
-        <widget class="QPushButton" name="outFile_button">
+       <item row="8" column="1" colspan="2">
+        <widget class="QCheckBox" name="limit_inst_checkBox">
          <property name="text">
-          <string>Select Output file</string>
+          <string>Limit instructions</string>
          </property>
         </widget>
        </item>
-       <item row="11" column="1" colspan="2">
-        <spacer name="verticalSpacer_3">
+       <item row="3" column="1" colspan="2">
+        <spacer name="verticalSpacer_4">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -192,25 +174,11 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>1</width>
+           <width>20</width>
            <height>20</height>
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="0" column="1" colspan="2">
-        <widget class="QPushButton" name="progFile_button">
-         <property name="text">
-          <string>Select Program file</string>
-         </property>
-        </widget>
-       </item>
-       <item row="10" column="1" colspan="2">
-        <widget class="QSpinBox" name="maxInst_spinBox">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
        </item>
        <item row="14" column="2">
         <widget class="QComboBox" name="max_mem_units_comboBox">
@@ -239,21 +207,33 @@
          </item>
         </widget>
        </item>
-       <item row="7" column="1" colspan="2">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+       <item row="2" column="1" colspan="2">
+        <widget class="QPushButton" name="inFile_button">
+         <property name="text">
+          <string>Select Input file</string>
          </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Minimum</enum>
+        </widget>
+       </item>
+       <item row="14" column="1">
+        <widget class="QSpinBox" name="maxMem_spinBox">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QPushButton" name="progFile_button">
+         <property name="text">
+          <string>Select Program file</string>
          </property>
-        </spacer>
+        </widget>
+       </item>
+       <item row="10" column="1" colspan="2">
+        <widget class="QSpinBox" name="maxInst_spinBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
        <item row="1" column="1" colspan="2">
         <spacer name="verticalSpacer_6">
@@ -266,36 +246,6 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="2" column="1" colspan="2">
-        <widget class="QPushButton" name="inFile_button">
-         <property name="text">
-          <string>Select Input file</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1" colspan="2">
-        <widget class="QCheckBox" name="limit_inst_checkBox">
-         <property name="text">
-          <string>Limit instructions</string>
-         </property>
-        </widget>
-       </item>
-       <item row="17" column="1" colspan="2">
-        <spacer name="verticalSpacer_7">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Minimum</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>1</width>
            <height>20</height>
           </size>
          </property>
@@ -314,8 +264,66 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1" colspan="2">
-        <spacer name="verticalSpacer_4">
+       <item row="9" column="1" colspan="2">
+        <widget class="QLabel" name="max_inst_label">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Max # of Instructions</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1" colspan="2">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Minimum</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>1</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="17" column="1" colspan="2">
+        <spacer name="verticalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Minimum</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>1</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="25" column="1" colspan="2">
+        <widget class="QPushButton" name="start_pause_button">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Fuck it!!! (execute)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1" colspan="2">
+        <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -329,6 +337,51 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="18" column="1" colspan="2">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Delay</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="19" column="1">
+        <widget class="QSlider" name="timeDelay_horizontalSlider">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="singleStep">
+          <number>10</number>
+         </property>
+         <property name="pageStep">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="19" column="2">
+        <widget class="QSpinBox" name="timeDelay_spinBox">
+         <property name="suffix">
+          <string> ms</string>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -347,9 +400,6 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1" colspan="2">
-     <widget class="QTextEdit" name="Program_textbox"/>
-    </item>
     <item row="6" column="2">
      <widget class="QCheckBox" name="textWrapping_checkBox">
       <property name="text">
@@ -357,21 +407,30 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+    <item row="2" column="1" colspan="2">
+     <widget class="QTextEdit" name="Program_textbox"/>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>BrainFuck Program</string>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>4</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
+     </widget>
     </item>
     <item row="0" column="1" colspan="4">
      <widget class="QWidget" name="memDisplay" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
       <layout class="QGridLayout" name="gridLayout_4">
        <property name="leftMargin">
         <number>0</number>

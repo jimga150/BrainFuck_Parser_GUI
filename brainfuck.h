@@ -63,6 +63,7 @@ public:
     uint64_t instruction_count = 0;
     
     uint64_t execution_time = 0; //ms
+    volatile unsigned long command_delay = 0; //ms
     
 signals:
     

@@ -70,7 +70,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent* event) override;
+    
+    void showEvent(QShowEvent* event) override;
     
     void update_maxmem();
     
@@ -131,6 +133,10 @@ private slots:
     void on_max_mem_checkBox_stateChanged(int arg1);
     
     void on_textWrapping_checkBox_stateChanged(int arg1);
+    
+    void on_timeDelay_horizontalSlider_sliderMoved(int position);
+        
+    void on_timeDelay_spinBox_editingFinished();
     
 private:
     Ui::MainWindow *ui;
