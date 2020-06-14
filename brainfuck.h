@@ -17,6 +17,12 @@ struct ui_updates_struct{
         this->update_mem = false;
         this->update_output = false;
     }
+    
+    void operator|=(ui_updates_struct& other){
+        this->update_mem_ptr |= other.update_mem_ptr;
+        this->update_mem |= other.update_mem;
+        this->update_output |= other.update_output;
+    }
 };
 
 class BrainFuck : public QObject

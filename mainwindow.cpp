@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->ui->Output->setLineWrapMode(QTextEdit::WidgetWidth);
     this->on_textWrapping_checkBox_stateChanged(static_cast<int>(this->ui->textWrapping_checkBox->checkState()));
     
-    connect(&this->brainfuck, &BrainFuck::requestUIUpdate, this, &MainWindow::updateUI);
+    connect(&this->brainfuck, &BrainFuck::requestUIUpdate, this, &MainWindow::updateUIPartial);
     connect(&this->brainfuck, &BrainFuck::programExit, this, &MainWindow::programFinished);
 }
 
@@ -44,26 +44,60 @@ void MainWindow::closeEvent(QCloseEvent *event){
     connect(&(this->brainfuck), &BrainFuck::programExit, this, &QMainWindow::close);
 }
 
-void MainWindow::updateUI(ui_updates_struct updates){
+void MainWindow::showEvent(QShowEvent* event){
+    Q_UNUSED(event)
+    
+    this->updateUI(false);
+}
+
+void MainWindow::updateUI(bool force){
+    
+    this->update_output();
+    this->update_memDisplay();
+    
+    if (force){
+        QApplication::processEvents();
+    }
+}
+
+void MainWindow::updateUIPartial(ui_updates_struct updates){
+    
+    //printf("Partial update requested: %llu\n", this->ui_update_timer.elapsed());
     
     if (!this->ui_update_timer.isValid()){
         this->ui_update_timer.start();
     } else if (this->ui_update_timer.elapsed() < this->monitor_refresh_rate_ms){
+//        if (updates.update_output){
+//            printf("Output update set aside for later\n");
+//        }
+        this->pending_updates |= updates;
         return;
     }
     
+    //printf("Timer high enough, continuing...\n");
+    
     this->ui_update_timer.restart();
     
-    if (updates.update_output){
+    bool anyUpdates = false;
+    
+    if (this->pending_updates.update_output){
+        anyUpdates = true;
         this->update_output();
     }
-    if (updates.update_mem || updates.update_mem_ptr){ //TODO: separate these?
+    if (this->pending_updates.update_mem || updates.update_mem_ptr){ //TODO: separate these?
+        anyUpdates = true;
         this->update_memDisplay();
     }
-    QApplication::processEvents();
+    if (anyUpdates){
+        QApplication::processEvents();
+        this->pending_updates.reset();
+    }
 }
 
 void MainWindow::update_output(){
+    
+    //printf("Updating output\n");
+    
     this->ui->Output->setText(this->brainfuck.output);
     
     QFontMetrics fm(this->ui->Output->currentFont());
@@ -80,16 +114,21 @@ void MainWindow::update_output(){
 
 void MainWindow::update_memDisplay(){
     
-    int min_cell_width = 100; //pixels //TODO: magic number
+    int min_cell_width = 30; //pixels //TODO: magic number
     
     QGridLayout* layout = static_cast<QGridLayout*>(this->ui->memDisplay->layout());
     
     int widget_width = this->ui->memDisplay->width();
+    //printf("%d\n", widget_width);
+    //fflush(stdout);
     int num_cells = widget_width/min_cell_width;
     uint64_t start_mem_index = this->brainfuck.mem_index - this->brainfuck.mem_index % num_cells;
     
     //TODO: add separate case for just shifting memory frame rather than redoing whole UI portion
     if (widget_width != this->memCellUIs.last_widget_width || start_mem_index != this->memCellUIs.last_start_mem_index){
+        
+        //printf("New widget width: %d; num cells: %d\n", widget_width, num_cells);
+        //fflush(stdout);
         
         //delete existing layout items (widgets inside will be preserved)
         QLayoutItem* item = nullptr;
@@ -150,8 +189,7 @@ void MainWindow::programFinished(int errorCode){
                 (exec_time == 0 ? "" : "\nInstructions per second: " + QString::number(ips))
                 );
     
-    this->update_output();
-    this->update_memDisplay();
+    this->updateUI(false);
     
     if (this->output_file){
         this->output_file->write(this->brainfuck.output.toUtf8().constData());

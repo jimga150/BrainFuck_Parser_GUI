@@ -90,11 +90,14 @@ public:
     
     QElapsedTimer ui_update_timer;
     int monitor_refresh_rate_ms = 0;
+    ui_updates_struct pending_updates;
     
     
 public slots:
     
-    void updateUI(ui_updates_struct updates);
+    void updateUI(bool force);
+    
+    void updateUIPartial(ui_updates_struct updates);
     
     void programFinished(int errorCode);
     

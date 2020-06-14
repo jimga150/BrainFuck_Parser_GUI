@@ -214,6 +214,9 @@ void BrainFuck::runProgram(){
             this->ui_updates.update_output = true;
             this->update_ui = true;
             
+//            printf("Output CMD received\n");
+//            fflush(stdout);
+            
             break;
         case ',':
             
