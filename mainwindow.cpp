@@ -6,7 +6,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     
-    //TODO: add optional delay between instructions
     //TODO: add ability to pause program and resume (separate from killing it)
     
     this->monitor_refresh_rate_ms = static_cast<int>(1000.0/this->screen()->refreshRate());
