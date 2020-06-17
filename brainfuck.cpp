@@ -7,42 +7,42 @@ BrainFuck::BrainFuck(QObject *parent) : QObject(parent){
 }
 
 bool BrainFuck::setProgram(QString new_program){
-    if (this->running) return false;
+    VALIDATE_SETTER("program")
     
     this->program = new_program;
     return true;
 }
 
 bool BrainFuck::setMaxMemEnforced(bool new_state){
-    if (this->running) return false;
+    VALIDATE_SETTER("memory limit flag")
     
     this->max_mem_enforced = new_state;
     return true;
 }
 
 bool BrainFuck::setMaxMem(uint64_t new_maxmem){
-    if (this->running) return false;
+    VALIDATE_SETTER("memory limit")
     
     this->max_memory = new_maxmem;
     return true;
 }
 
 bool BrainFuck::setMaxInstEnforced(bool new_state){
-    if (this->running) return false;
+    VALIDATE_SETTER("instruction limit flag")
     
     this->max_instructions_enforced = new_state;
     return true;
 }
 
 bool BrainFuck::setMaxInstructions(uint64_t new_maxinst){
-    if (this->running) return false;
+    VALIDATE_SETTER("instruction limit")
     
     this->max_instructions = new_maxinst;
     return true;
 }
 
 bool BrainFuck::setInput(QString new_input){
-    if (this->running) return false;
+    VALIDATE_SETTER("input")
     
     this->input = new_input;
     return true;

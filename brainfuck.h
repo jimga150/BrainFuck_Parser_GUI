@@ -6,6 +6,8 @@
 #include <QElapsedTimer>
 #include <QThread>
 
+#define VALIDATE_SETTER(data_name_str) if (this->running){fprintf(stderr, "Program thread running, cannot set "); fprintf(stderr, data_name_str); fprintf(stderr, "\n"); return false;}
+
 struct ui_updates_struct{
     //TODO: probably an input pointer i can display
     bool update_mem_ptr = false;

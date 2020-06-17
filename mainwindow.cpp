@@ -246,17 +246,12 @@ void MainWindow::on_progFile_button_clicked(){
     //TODO: disable load program button when program running
     if (this->brainfuck.setProgram(new_prog)){
         this->ui->Program_textbox->setText(new_prog);
-    } else {
-        fprintf(stderr, "Program currently running, cannot set program");        
     }
 }
 
 void MainWindow::on_Program_textbox_textChanged(){
-    //TODO: wrap error handling message into function
     //TODO: stop user from editing program text box when program running
-    if (!this->brainfuck.setProgram(this->ui->Program_textbox->toPlainText())){
-        fprintf(stderr, "Program currently running, cannot set program");
-    }
+    this->brainfuck.setProgram(this->ui->Program_textbox->toPlainText());
 }
 
 void MainWindow::on_inFile_button_clicked(){
@@ -283,9 +278,7 @@ void MainWindow::on_inFile_button_clicked(){
     
     if (this->brainfuck.setInput(new_input)){
         this->ui->Input->setText(new_input);
-    } else {
-        fprintf(stderr, "Program currently running, cannot set input");
-    }
+    } 
 }
 
 void MainWindow::on_Input_textChanged(){
