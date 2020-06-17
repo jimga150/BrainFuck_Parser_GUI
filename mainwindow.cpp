@@ -219,6 +219,8 @@ void MainWindow::programFinished(){
         this->output_file->flush();
     }
     
+    this->ui->Program_textbox->setEnabled(true);
+    this->ui->progFile_button->setEnabled(true);
     this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
 }
 
@@ -243,14 +245,12 @@ void MainWindow::on_progFile_button_clicked(){
     
     QString new_prog = stream.readAll();
     
-    //TODO: disable load program button when program running
     if (this->brainfuck.setProgram(new_prog)){
         this->ui->Program_textbox->setText(new_prog);
     }
 }
 
 void MainWindow::on_Program_textbox_textChanged(){
-    //TODO: stop user from editing program text box when program running
     this->brainfuck.setProgram(this->ui->Program_textbox->toPlainText());
 }
 
@@ -353,11 +353,16 @@ void MainWindow::on_maxInst_spinBox_valueChanged(int arg1){
 
 void MainWindow::on_start_pause_button_clicked(){
     if (this->brainfuck.running){
+        
         this->brainfuck.stop = true;
-        this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
+        
     } else {
+        
         this->brainfuck.reset_program();
+        
         this->reset_UI();
+        this->ui->Program_textbox->setEnabled(false);
+        this->ui->progFile_button->setEnabled(false);
         
         this->program_thread = QtConcurrent::run(&(this->brainfuck), &BrainFuck::runProgram);
         this->program_thread_watcher.setFuture(this->program_thread);
