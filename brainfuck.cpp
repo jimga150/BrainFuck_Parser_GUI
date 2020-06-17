@@ -79,18 +79,24 @@ program_post_struct BrainFuck::runProgram(){
     
     QTextStream input(&(this->input), QIODevice::ReadOnly);
                 
-//    for (QChar c : this->program){
-//        bool valid = false;
-//        for (QChar v : valid_commands){
-//            if (v == c){
-//                valid = true;
-//                break;
-//            }
-//        }
-//        if (!valid){
-//            this->program.remove(c); //TODO: test this
-//        }
-//    }
+    std::vector<QChar> to_remove_indices;
+    
+    for (QChar c : this->program){
+        bool valid = false;
+        for (QChar v : valid_commands){
+            if (v == c){
+                valid = true;
+                break;
+            }
+        }
+        if (!valid){
+            to_remove_indices.push_back(c);
+        }
+    }
+    
+    for (QChar c : to_remove_indices){
+        this->program.remove(c);
+    }
     
     uint program_length = this->program.length();
     char program_chars[program_length];
