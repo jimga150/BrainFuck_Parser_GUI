@@ -173,22 +173,24 @@ int MainWindow::updateMemCellLayout(uint64_t current_mem_index){
     //TODO: add separate case for just shifting memory frame rather than redoing whole UI portion
     if (widget_width != this->memCellUIs.last_widget_width || start_mem_index != this->memCellUIs.last_start_mem_index){
         
-        //printf("New widget width: %d; num cells: %d\n", widget_width, num_cells);
-        //fflush(stdout);
-        
-        //delete existing layout items (widgets inside will be preserved)
-        QLayoutItem* item = nullptr;
-        while((item = layout->takeAt(0))){
-            //Dont delete widget, we own that and manage it elsewhere
-            delete item;
-        }
-        
-        this->memCellUIs.change_num_cells(num_cells);
-        
-        for (int i = 0; i < num_cells; ++i){        
-            layout->addWidget(&(this->memCellUIs.labels[i]), 0, i, Qt::AlignHCenter);
-            layout->addWidget(&(this->memCellUIs.cells[i]), 1, i, Qt::AlignHCenter);
-            layout->addWidget(&(this->memCellUIs.pointer_row[i]), 2, i, Qt::AlignHCenter);
+        if (start_mem_index != this->memCellUIs.last_start_mem_index || this->memCellUIs.last_widget_width == 0){
+            //printf("New widget width: %d; num cells: %d\n", widget_width, num_cells);
+            //fflush(stdout);
+            
+            //delete existing layout items (widgets inside will be preserved)
+            QLayoutItem* item = nullptr;
+            while((item = layout->takeAt(0))){
+                //Dont delete widget, we own that and manage it elsewhere
+                delete item;
+            }
+            
+            this->memCellUIs.change_num_cells(num_cells);
+            
+            for (int i = 0; i < num_cells; ++i){        
+                layout->addWidget(&(this->memCellUIs.labels[i]), 0, i, Qt::AlignHCenter);
+                layout->addWidget(&(this->memCellUIs.cells[i]), 1, i, Qt::AlignHCenter);
+                layout->addWidget(&(this->memCellUIs.pointer_row[i]), 2, i, Qt::AlignHCenter);
+            }
         }
         
         for (int i = 0; i < num_cells; ++i){
@@ -236,7 +238,7 @@ void MainWindow::programFinished(){
     
     this->ui->Program_textbox->setEnabled(true);
     this->ui->progFile_button->setEnabled(true);
-    this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
+    this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //should be same as in .ui file
 }
 
 void MainWindow::on_progFile_button_clicked(){
