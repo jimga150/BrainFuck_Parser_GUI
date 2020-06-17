@@ -320,7 +320,7 @@ void MainWindow::on_outFile_button_clicked(){
     
     this->output_file = new QFile(filename);
     if (!this->output_file->open(QIODevice::WriteOnly | QIODevice::Truncate)){
-        //TODO: alert user
+        fprintf(stderr, "Cannot open output file at %s\n", filename.toUtf8().constData());
         delete this->output_file;
         this->output_file = nullptr;
         return;
