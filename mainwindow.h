@@ -78,8 +78,12 @@ public:
     void update_maxmem();
     
     void update_output(QString new_output);
+        
+    void update_memPtr(uint64_t current_mem_index, int num_cells);
     
-    void update_memDisplay(uint64_t mem_index, QVector<char> memory);
+    void update_memVal(QVector<char> memory, int num_cells);
+    
+    int updateMemCellLayout(uint64_t current_mem_index);
     
     void reset_UI();
     

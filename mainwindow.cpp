@@ -70,7 +70,10 @@ void MainWindow::updateUI(bool force){
     if (!can_update) return;
     
     this->update_output(ui_state.output);
-    this->update_memDisplay(ui_state.mem_ptr, ui_state.memory);
+    
+    int num_cells = updateMemCellLayout(ui_state.mem_ptr);
+    this->update_memPtr(ui_state.mem_ptr, num_cells);
+    this->update_memVal(ui_state.memory, num_cells);
     
     if (force){
         QApplication::processEvents();
@@ -105,9 +108,16 @@ void MainWindow::updateUIPartial(ui_updates_struct updates){
         anyUpdates = true;
         this->update_output(pending_updates.output);
     }
-    if (this->pending_updates.update_mem || updates.update_mem_ptr){ //TODO: separate these?
+    if (this->pending_updates.update_mem || updates.update_mem_ptr){
         anyUpdates = true;
-        this->update_memDisplay(pending_updates.mem_ptr, pending_updates.memory);
+        int numcells = this->updateMemCellLayout(pending_updates.mem_ptr);
+        
+        if (this->pending_updates.update_mem_ptr){
+            this->update_memPtr(this->pending_updates.mem_ptr, numcells);
+        }
+        if (this->pending_updates.update_mem){
+            this->update_memVal(this->pending_updates.memory, numcells);
+        }
     }
     if (anyUpdates){
         QApplication::processEvents();
@@ -133,8 +143,23 @@ void MainWindow::update_output(QString new_output){
     }
 }
 
-void MainWindow::update_memDisplay(uint64_t mem_index, QVector<char> memory){
-    
+void MainWindow::update_memPtr(uint64_t current_mem_index, int num_cells){    
+    if (current_mem_index != this->memCellUIs.last_pointer_index){
+        this->memCellUIs.pointer_row[this->memCellUIs.last_pointer_index % num_cells].clear();
+        this->memCellUIs.pointer_row[current_mem_index % num_cells].setText(this->pointer_label);
+        this->memCellUIs.last_pointer_index = current_mem_index;
+    }
+}
+
+void MainWindow::update_memVal(QVector<char> memory, int num_cells){
+    for (int i = 0; i < num_cells; ++i){
+        uint mem_index = this->memCellUIs.last_start_mem_index + i;
+        int mem_value = mem_index < static_cast<uint64_t>(memory.size()) ? memory[mem_index] : 0;
+        this->memCellUIs.cells[i].setText(QString::number(mem_value, 16).toUpper().right(2));
+    }
+}
+
+int MainWindow::updateMemCellLayout(uint64_t current_mem_index){
     int min_cell_width = 30; //pixels //TODO: magic number
     
     QGridLayout* layout = static_cast<QGridLayout*>(this->ui->memDisplay->layout());
@@ -143,7 +168,7 @@ void MainWindow::update_memDisplay(uint64_t mem_index, QVector<char> memory){
     //printf("%d\n", widget_width);
     //fflush(stdout);
     int num_cells = widget_width/min_cell_width;
-    uint64_t start_mem_index = mem_index - mem_index % num_cells;
+    uint64_t start_mem_index = current_mem_index - current_mem_index % num_cells;
     
     //TODO: add separate case for just shifting memory frame rather than redoing whole UI portion
     if (widget_width != this->memCellUIs.last_widget_width || start_mem_index != this->memCellUIs.last_start_mem_index){
@@ -179,17 +204,7 @@ void MainWindow::update_memDisplay(uint64_t mem_index, QVector<char> memory){
         this->memCellUIs.last_start_mem_index = start_mem_index;
     }
     
-    for (int i = 0; i < num_cells; ++i){
-        uint mem_index = start_mem_index + i;
-        int mem_value = mem_index < static_cast<uint64_t>(memory.size()) ? memory[mem_index] : 0;
-        this->memCellUIs.cells[i].setText(QString::number(mem_value, 16).toUpper().right(2));
-    }
-    
-    if (mem_index != this->memCellUIs.last_pointer_index){
-        this->memCellUIs.pointer_row[this->memCellUIs.last_pointer_index % num_cells].clear();
-        this->memCellUIs.pointer_row[mem_index % num_cells].setText(this->pointer_label);
-        this->memCellUIs.last_pointer_index = mem_index;
-    }
+    return num_cells;
 }
 
 void MainWindow::programFinished(){
