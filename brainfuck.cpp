@@ -71,7 +71,7 @@ void BrainFuck::reset_program(){
     this->instruction_count = 0;
 }
 
-void BrainFuck::runProgram(){
+program_post_struct BrainFuck::runProgram(){
     
     this->running = true;
     
@@ -132,7 +132,7 @@ void BrainFuck::runProgram(){
         program_post_struct result; 
         result.error_code = 1;
         result.error_message = "Bracket mismatch. Last known level: " + QString::number(looplevel);
-        emit this->programExit(result); //TODO: this is dirty
+        return result; //TODO: this is dirty
     }
     
     //make lookup table for brackets based on loop level list
@@ -326,5 +326,5 @@ void BrainFuck::runProgram(){
     result.instruction_count = this->instruction_count;
     result.memory_access_count = this->memory_access_count;
     
-    emit this->programExit(result);
+    return result;
 }

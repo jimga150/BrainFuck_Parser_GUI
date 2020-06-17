@@ -145,13 +145,11 @@ private:
 signals:
     
     void requestUIUpdate(ui_updates_struct updates);
-    
-    void programExit(program_post_struct result);
-    
+        
     
 public slots:
     
-    void runProgram();
+    program_post_struct runProgram();
     
 };
 

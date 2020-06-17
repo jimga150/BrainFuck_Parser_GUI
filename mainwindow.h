@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QTimer>
+#include <QtConcurrent>
 
 #include "brainfuck.h"
 #include "ui_mainwindow.h"
@@ -94,6 +95,10 @@ public:
     int monitor_refresh_rate_ms = 0;
     ui_updates_struct pending_updates;
     
+    QMetaObject::Connection program_exit_connection;
+    QFutureWatcher<program_post_struct> program_thread_watcher;
+    QFuture<program_post_struct> program_thread;
+    
     
 public slots:
     
@@ -101,7 +106,7 @@ public slots:
     
     void updateUIPartial(ui_updates_struct updates);
     
-    void programFinished(program_post_struct exit_info);
+    void programFinished();
     
     
 private slots:

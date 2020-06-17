@@ -28,8 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
     //allows ui_updates_struct to be used in signals and slots
     qRegisterMetaType<ui_updates_struct>();
     
-    connect(&this->brainfuck, &BrainFuck::requestUIUpdate, this, &MainWindow::updateUIPartial, Qt::AutoConnection); //change to Qt::BlockingQueuedConnection when QThread is used
-    connect(&this->brainfuck, &BrainFuck::programExit, this, &MainWindow::programFinished);
+    connect(&this->brainfuck, &BrainFuck::requestUIUpdate, this, &MainWindow::updateUIPartial, Qt::BlockingQueuedConnection); 
+    this->program_exit_connection = connect(&this->program_thread_watcher, &QFutureWatcher<program_post_struct>::finished, this, &MainWindow::programFinished);
 }
 
 MainWindow::~MainWindow()
@@ -44,7 +44,8 @@ void MainWindow::closeEvent(QCloseEvent *event){
     //ask BF to stop
     if (this->brainfuck.running){
         this->brainfuck.stop = true;
-        connect(&(this->brainfuck), &BrainFuck::programExit, this, &QMainWindow::close);
+        disconnect(this->program_exit_connection);
+        this->program_thread.result();
     }
 }
 
@@ -184,7 +185,9 @@ void MainWindow::update_memDisplay(uint64_t mem_index, QVector<char> memory){
     }
 }
 
-void MainWindow::programFinished(program_post_struct exit_info){
+void MainWindow::programFinished(){
+    
+    program_post_struct exit_info = this->program_thread.result();
     
     double mem_access_percent = (exit_info.memory_access_count*100.0)/(exit_info.instruction_count);
     
@@ -354,8 +357,11 @@ void MainWindow::on_start_pause_button_clicked(){
         this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
     } else {
         this->brainfuck.reset_program();
-        this->ui->Console->clear();
-        QTimer::singleShot(100, &(this->brainfuck), SLOT(runProgram()));
+        this->ui->Console->clear(); //TODO: reset rest of UI as well
+        
+        this->program_thread = QtConcurrent::run(&(this->brainfuck), &BrainFuck::runProgram);
+        this->program_thread_watcher.setFuture(this->program_thread);
+        
         this->ui->start_pause_button->setText("Halt Program");
     }
 }
