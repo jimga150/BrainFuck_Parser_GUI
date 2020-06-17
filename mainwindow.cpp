@@ -252,7 +252,7 @@ void MainWindow::on_progFile_button_clicked(){
     
     QFile infile(filename);
     if (!infile.open(QIODevice::ReadOnly | QIODevice::Text)){
-        //TODO: notify user
+        fprintf(stderr, "Cannot open program file at %s\n", filename.toUtf8().constData());
         return;
     }
     
@@ -283,7 +283,7 @@ void MainWindow::on_inFile_button_clicked(){
     
     QFile infile(filename);
     if (!infile.open(QIODevice::ReadOnly | QIODevice::Text)){
-        //TODO: notify user
+        fprintf(stderr, "Cannot open input file at %s\n", filename.toUtf8().constData());
         return;
     }
     
