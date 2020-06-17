@@ -10,13 +10,13 @@ MainWindow::MainWindow(QWidget *parent)
     
     this->monitor_refresh_rate_ms = static_cast<int>(1000.0/this->screen()->refreshRate());
     
-    this->ui->Program_textbox->setText(this->brainfuck.program);
+    this->ui->Program_textbox->setText(this->brainfuck.getProgram());
     
     this->ui->maxMem_spinBox->setMaximum(INT_MAX);
     this->ui->maxInst_spinBox->setMaximum(INT_MAX);
     
-    this->ui->maxMem_spinBox->setValue(this->brainfuck.max_memory);
-    this->ui->maxInst_spinBox->setValue(this->brainfuck.max_instructions);
+    this->ui->maxMem_spinBox->setValue(this->brainfuck.getMaxMem());
+    this->ui->maxInst_spinBox->setValue(this->brainfuck.getMaxInstructions());
     
     QFont output_font("Monaco");
     output_font.setStyleHint(QFont::Courier);
@@ -25,7 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
     this->ui->Output->setLineWrapMode(QTextEdit::WidgetWidth);
     this->on_textWrapping_checkBox_stateChanged(static_cast<int>(this->ui->textWrapping_checkBox->checkState()));
     
-    connect(&this->brainfuck, &BrainFuck::requestUIUpdate, this, &MainWindow::updateUIPartial);
+    //allows ui_updates_struct to be used in signals and slots
+    qRegisterMetaType<ui_updates_struct>();
+    
+    connect(&this->brainfuck, &BrainFuck::requestUIUpdate, this, &MainWindow::updateUIPartial, Qt::AutoConnection); //change to Qt::BlockingQueuedConnection when QThread is used
     connect(&this->brainfuck, &BrainFuck::programExit, this, &MainWindow::programFinished);
 }
 
@@ -53,8 +56,13 @@ void MainWindow::showEvent(QShowEvent* event){
 
 void MainWindow::updateUI(bool force){
     
-    this->update_output();
-    this->update_memDisplay();
+    ui_updates_struct ui_state;
+    bool can_update = this->brainfuck.getCurrentState(&ui_state);
+    
+    if (!can_update) return;
+    
+    this->update_output(ui_state.output);
+    this->update_memDisplay(ui_state.mem_ptr, ui_state.memory);
     
     if (force){
         QApplication::processEvents();
@@ -65,17 +73,21 @@ void MainWindow::updateUIPartial(ui_updates_struct updates){
     
     //printf("Partial update requested: %llu\n", this->ui_update_timer.elapsed());
     
+    this->pending_updates |= updates;
+    
     if (!this->ui_update_timer.isValid()){
         this->ui_update_timer.start();
-    } else if (this->ui_update_timer.elapsed() < this->monitor_refresh_rate_ms){
-//        if (updates.update_output){
-//            printf("Output update set aside for later\n");
-//        }
-        this->pending_updates |= updates;
         return;
     }
     
-    //printf("Timer high enough, continuing...\n");
+    if (this->ui_update_timer.elapsed() < this->monitor_refresh_rate_ms){
+//        if (updates.update_output){
+//            printf("Output update set aside for later: %s\n", updates.output.toUtf8().constData());
+//        }
+        return;
+    }
+    
+    //printf("Timer high enough, continuing... (%llu)\n", updates.mem_ptr);
     
     this->ui_update_timer.restart();
     
@@ -83,11 +95,11 @@ void MainWindow::updateUIPartial(ui_updates_struct updates){
     
     if (this->pending_updates.update_output){
         anyUpdates = true;
-        this->update_output();
+        this->update_output(pending_updates.output);
     }
     if (this->pending_updates.update_mem || updates.update_mem_ptr){ //TODO: separate these?
         anyUpdates = true;
-        this->update_memDisplay();
+        this->update_memDisplay(pending_updates.mem_ptr, pending_updates.memory);
     }
     if (anyUpdates){
         QApplication::processEvents();
@@ -95,14 +107,14 @@ void MainWindow::updateUIPartial(ui_updates_struct updates){
     }
 }
 
-void MainWindow::update_output(){
+void MainWindow::update_output(QString new_output){
     
-    //printf("Updating output\n");
+    //printf("Updating output: %s\n", new_output.toUtf8().constData());
     
-    this->ui->Output->setText(this->brainfuck.output);
+    this->ui->Output->setText(new_output);
     
     QFontMetrics fm(this->ui->Output->currentFont());
-    QSize text_size(fm.size(Qt::TextExpandTabs, this->brainfuck.output));
+    QSize text_size(fm.size(Qt::TextExpandTabs, new_output));
     
     QSize viewport = this->ui->Output->geometry().size();
     
@@ -113,7 +125,7 @@ void MainWindow::update_output(){
     }
 }
 
-void MainWindow::update_memDisplay(){
+void MainWindow::update_memDisplay(uint64_t mem_index, QVector<char> memory){
     
     int min_cell_width = 30; //pixels //TODO: magic number
     
@@ -123,7 +135,7 @@ void MainWindow::update_memDisplay(){
     //printf("%d\n", widget_width);
     //fflush(stdout);
     int num_cells = widget_width/min_cell_width;
-    uint64_t start_mem_index = this->brainfuck.mem_index - this->brainfuck.mem_index % num_cells;
+    uint64_t start_mem_index = mem_index - mem_index % num_cells;
     
     //TODO: add separate case for just shifting memory frame rather than redoing whole UI portion
     if (widget_width != this->memCellUIs.last_widget_width || start_mem_index != this->memCellUIs.last_start_mem_index){
@@ -161,30 +173,30 @@ void MainWindow::update_memDisplay(){
     
     for (int i = 0; i < num_cells; ++i){
         uint mem_index = start_mem_index + i;
-        int mem_value = mem_index < this->brainfuck.memory.size() ? this->brainfuck.memory[mem_index] : 0;
+        int mem_value = mem_index < static_cast<uint64_t>(memory.size()) ? memory[mem_index] : 0;
         this->memCellUIs.cells[i].setText(QString::number(mem_value, 16).toUpper().right(2));
     }
     
-    if (this->brainfuck.mem_index != this->memCellUIs.last_pointer_index){
+    if (mem_index != this->memCellUIs.last_pointer_index){
         this->memCellUIs.pointer_row[this->memCellUIs.last_pointer_index % num_cells].clear();
-        this->memCellUIs.pointer_row[this->brainfuck.mem_index % num_cells].setText(this->pointer_label);
-        this->memCellUIs.last_pointer_index = this->brainfuck.mem_index;
+        this->memCellUIs.pointer_row[mem_index % num_cells].setText(this->pointer_label);
+        this->memCellUIs.last_pointer_index = mem_index;
     }
 }
 
-void MainWindow::programFinished(int errorCode){
+void MainWindow::programFinished(program_post_struct exit_info){
     
-    double mem_access_percent = (this->brainfuck.memory_access_count*100.0)/(this->brainfuck.instruction_count);
+    double mem_access_percent = (exit_info.memory_access_count*100.0)/(exit_info.instruction_count);
     
-    unsigned long long exec_time = this->brainfuck.execution_time;
-    double ips = this->brainfuck.instruction_count*1.0/(exec_time/1000.0);
+    unsigned long long exec_time = exit_info.execution_time;
+    double ips = exit_info.instruction_count*1.0/(exec_time/1000.0);
     
     this->ui->Console->append(
-                "Program finished with exit code " + QString::number(errorCode) + 
-                "\n" + (errorCode ? "Error: " + this->brainfuck.error_message + "\n" : "") + 
-                "\nMemory used: " + QString::number(this->brainfuck.memory.size()) + " Bytes" +            
-                "\nInstructions used: " + QString::number(this->brainfuck.instruction_count) + 
-                "\nMemory accesses: " + QString::number(this->brainfuck.memory_access_count) + 
+                "Program finished with exit code " + QString::number(exit_info.error_code) + 
+                "\n" + (exit_info.error_code ? "Error: " + exit_info.error_message + "\n" : "") + 
+                "\nMemory used: " + QString::number(exit_info.memory_size) + " Bytes" +            
+                "\nInstructions used: " + QString::number(exit_info.instruction_count) + 
+                "\nMemory accesses: " + QString::number(exit_info.memory_access_count) + 
                 "\n" + QString::number(mem_access_percent, 'g', 3) + "% of instructions accessed memory" + 
                 (exec_time == 0 ? "" : "\nExecution time: " + QString::number(exec_time) + " ms") + 
                 (exec_time == 0 ? "" : "\nInstructions per second: " + QString::number(ips))
@@ -193,7 +205,7 @@ void MainWindow::programFinished(int errorCode){
     this->updateUI(false);
     
     if (this->output_file){
-        this->output_file->write(this->brainfuck.output.toUtf8().constData());
+        this->output_file->write(exit_info.output.toUtf8().constData());
         this->output_file->flush();
     }
     
@@ -219,13 +231,22 @@ void MainWindow::on_progFile_button_clicked(){
     
     QTextStream stream(&infile);
     
-    this->brainfuck.program = stream.readAll();
+    QString new_prog = stream.readAll();
     
-    this->ui->Program_textbox->setText(this->brainfuck.program);
+    //TODO: disable load program button when program running
+    if (this->brainfuck.setProgram(new_prog)){
+        this->ui->Program_textbox->setText(new_prog);
+    } else {
+        fprintf(stderr, "Program currently running, cannot set program");        
+    }
 }
 
 void MainWindow::on_Program_textbox_textChanged(){
-    this->brainfuck.program = this->ui->Program_textbox->toPlainText();
+    //TODO: wrap error handling message into function
+    //TODO: stop user from editing program text box when program running
+    if (!this->brainfuck.setProgram(this->ui->Program_textbox->toPlainText())){
+        fprintf(stderr, "Program currently running, cannot set program");
+    }
 }
 
 void MainWindow::on_inFile_button_clicked(){
@@ -248,13 +269,18 @@ void MainWindow::on_inFile_button_clicked(){
     
     QTextStream stream(&infile);
     
-    this->brainfuck.input = stream.readAll();
+    QString new_input = stream.readAll();
     
-    this->ui->Input->setText(this->brainfuck.input);
+    if (this->brainfuck.setInput(new_input)){
+        this->ui->Input->setText(new_input);
+    } else {
+        fprintf(stderr, "Program currently running, cannot set input");
+    }
 }
 
 void MainWindow::on_Input_textChanged(){
-    this->brainfuck.input = this->ui->Input->toPlainText();
+    //TODO: find way of making this work when program is running
+    this->brainfuck.setInput(this->ui->Input->toPlainText());
 }
 
 void MainWindow::on_outFile_button_clicked(){
@@ -315,11 +341,11 @@ void MainWindow::update_maxmem(){
     
     uint coeff = this->ui->maxMem_spinBox->value();
     
-    this->brainfuck.max_memory = coeff*multiplier;
+    this->brainfuck.setMaxMem(coeff*multiplier);
 }
 
 void MainWindow::on_maxInst_spinBox_valueChanged(int arg1){
-    this->brainfuck.max_instructions = arg1;
+    this->brainfuck.setMaxInstructions(arg1);
 }
 
 void MainWindow::on_start_pause_button_clicked(){
@@ -361,7 +387,7 @@ void MainWindow::on_limit_inst_checkBox_stateChanged(int arg1){
         break;
     }
     
-    this->brainfuck.max_instructions_enforced = enforce_inst;
+    this->brainfuck.setMaxInstEnforced(enforce_inst);
     
     this->ui->max_inst_label->setEnabled(enforce_inst);
     this->ui->maxInst_spinBox->setEnabled(enforce_inst);
@@ -389,7 +415,7 @@ void MainWindow::on_max_mem_checkBox_stateChanged(int arg1){
         break;
     }
     
-    this->brainfuck.max_mem_enforced = enforce_mem;
+    this->brainfuck.setMaxMemEnforced(enforce_mem);
     
     this->ui->max_mem_label->setEnabled(enforce_mem);
     this->ui->maxMem_spinBox->setEnabled(enforce_mem);

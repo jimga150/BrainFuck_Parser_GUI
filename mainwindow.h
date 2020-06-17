@@ -76,9 +76,9 @@ public:
     
     void update_maxmem();
     
-    void update_output();
+    void update_output(QString new_output);
     
-    void update_memDisplay();
+    void update_memDisplay(uint64_t mem_index, QVector<char> memory);
     
     
     const QString pointer_label = "^";
@@ -101,7 +101,7 @@ public slots:
     
     void updateUIPartial(ui_updates_struct updates);
     
-    void programFinished(int errorCode);
+    void programFinished(program_post_struct exit_info);
     
     
 private slots:

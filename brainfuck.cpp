@@ -6,6 +6,59 @@ BrainFuck::BrainFuck(QObject *parent) : QObject(parent){
     this->program = this->default_brainfuck;
 }
 
+bool BrainFuck::setProgram(QString new_program){
+    if (this->running) return false;
+    
+    this->program = new_program;
+    return true;
+}
+
+bool BrainFuck::setMaxMemEnforced(bool new_state){
+    if (this->running) return false;
+    
+    this->max_mem_enforced = new_state;
+    return true;
+}
+
+bool BrainFuck::setMaxMem(uint64_t new_maxmem){
+    if (this->running) return false;
+    
+    this->max_memory = new_maxmem;
+    return true;
+}
+
+bool BrainFuck::setMaxInstEnforced(bool new_state){
+    if (this->running) return false;
+    
+    this->max_instructions_enforced = new_state;
+    return true;
+}
+
+bool BrainFuck::setMaxInstructions(uint64_t new_maxinst){
+    if (this->running) return false;
+    
+    this->max_instructions = new_maxinst;
+    return true;
+}
+
+bool BrainFuck::setInput(QString new_input){
+    if (this->running) return false;
+    
+    this->input = new_input;
+    return true;
+}
+
+bool BrainFuck::getCurrentState(ui_updates_struct* state){
+    
+    if (this->running) return false; //Indicates that current state isnt accessible in this thread, wait for an update
+    
+    state->mem_ptr = this->mem_index;
+    state->memory = this->memory;
+    state->output = this->output;
+    
+    return true;
+}
+
 void BrainFuck::reset_program(){
     this->memory.clear();
     this->memory.push_back(0);
@@ -76,8 +129,10 @@ void BrainFuck::runProgram(){
 //    printf("]\n");
         
     if (looplevel){
-        this->error_message = "Bracket mismatch. Last known level: " + QString::number(looplevel);
-        emit this->programExit(1); //TODO: make real error enum
+        program_post_struct result; 
+        result.error_code = 1;
+        result.error_message = "Bracket mismatch. Last known level: " + QString::number(looplevel);
+        emit this->programExit(result); //TODO: this is dirty
     }
     
     //make lookup table for brackets based on loop level list
@@ -154,7 +209,7 @@ void BrainFuck::runProgram(){
                 break;
             }
             
-            if (this->mem_index >= this->memory.size()){
+            if (this->mem_index >= static_cast<uint64_t>(this->memory.size())){
                 this->memory.push_back(0);
             }
             
@@ -240,6 +295,11 @@ void BrainFuck::runProgram(){
         }
         
         if (this->update_ui){
+            
+            this->ui_updates.mem_ptr = this->mem_index;            
+            this->ui_updates.memory = this->memory;            
+            this->ui_updates.output = this->output;            
+            
             emit this->requestUIUpdate(this->ui_updates);
             this->ui_updates.reset();
             this->update_ui = false;
@@ -256,5 +316,15 @@ void BrainFuck::runProgram(){
     this->running = false;
     this->stop = false;
     
-    emit this->programExit(error);
+    program_post_struct result;
+    
+    result.output = this->output;
+    result.error_code = error;
+    result.memory_size = this->memory.size();
+    result.error_message = this->error_message;
+    result.execution_time = this->execution_time;
+    result.instruction_count = this->instruction_count;
+    result.memory_access_count = this->memory_access_count;
+    
+    emit this->programExit(result);
 }
