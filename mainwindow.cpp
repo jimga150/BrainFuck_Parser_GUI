@@ -55,6 +55,13 @@ void MainWindow::showEvent(QShowEvent* event){
     this->updateUI(false);
 }
 
+void MainWindow::reset_UI(){
+    this->ui->Output->clear();
+    this->ui->Console->clear();
+    this->ui->Input->setText(this->brainfuck.getInput());
+    this->ui->Program_textbox->setText(this->brainfuck.getProgram());
+}
+
 void MainWindow::updateUI(bool force){
     
     ui_updates_struct ui_state;
@@ -357,7 +364,7 @@ void MainWindow::on_start_pause_button_clicked(){
         this->ui->start_pause_button->setText("Fuck it!!! (execute)"); //TODO: derive these strings from the same place
     } else {
         this->brainfuck.reset_program();
-        this->ui->Console->clear(); //TODO: reset rest of UI as well
+        this->reset_UI();
         
         this->program_thread = QtConcurrent::run(&(this->brainfuck), &BrainFuck::runProgram);
         this->program_thread_watcher.setFuture(this->program_thread);

@@ -81,6 +81,8 @@ public:
     
     void update_memDisplay(uint64_t mem_index, QVector<char> memory);
     
+    void reset_UI();
+    
     
     const QString pointer_label = "^";
     
