@@ -160,7 +160,7 @@ void MainWindow::update_memVal(QVector<char> memory, int num_cells){
 }
 
 int MainWindow::updateMemCellLayout(uint64_t current_mem_index){
-    int min_cell_width = 30; //pixels //TODO: magic number
+    int min_cell_width = this->font().pointSize()*2*1.15; //pixels
     
     QGridLayout* layout = static_cast<QGridLayout*>(this->ui->memDisplay->layout());
     
